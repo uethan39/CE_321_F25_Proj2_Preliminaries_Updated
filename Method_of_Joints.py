@@ -33,7 +33,6 @@ def NodeIsViable(node):
         connected_computed = any(bar.is_computed for bar in node.bars if bar not in unknown_bars)
         return has_known_force or connected_computed
     else:
-        # More than 2 unknowns → cannot solve directly
         return False
 
 # Compute unknown force for a single bar at a node
@@ -49,32 +48,45 @@ def SumOfForcesInLocalX(node, bar):
     bar.axial_load = -sum_x
     bar.is_computed = True
 
-# Compute unknown forces for two unknown bars at a node
+# Compute unknown forces for two unknown bars at a node using proper 2x2 system
 def SumOfForcesInLocalY(node, unknown_bars):
     if len(unknown_bars) != 2:
         sys.exit("SumOfForcesInLocalY requires exactly two unknown bars")
 
     bar1, bar2 = unknown_bars
 
-    # Compute sine and cosine between bars
-    sin_theta = geom.SineBars(bar1, bar2)
-    cos_theta = geom.CosineBars(bar1, bar2)
+    # Vectors of each bar from the node
+    vec1 = geom.BarNodeToVector(node, bar1)
+    vec2 = geom.BarNodeToVector(node, bar2)
 
-    if sin_theta == 0:
-        sys.exit("Cannot compute forces: bars are collinear")
+    # Cosine and sine of each bar relative to global x-axis
+    cos1 = geom.CosineVectors([1,0], vec1)
+    sin1 = geom.SineVectors([1,0], vec1)
+    cos2 = geom.CosineVectors([1,0], vec2)
+    sin2 = geom.SineVectors([1,0], vec2)
 
     # Sum of known forces at the node
-    sum_x = node.xforce_external + (node.xforce_reaction if not np.isnan(node.xforce_reaction) else 0)
-    sum_y = node.yforce_external + (node.yforce_reaction if not np.isnan(node.yforce_reaction) else 0)
+    sum_fx = node.xforce_external + (node.xforce_reaction if not np.isnan(node.xforce_reaction) else 0)
+    sum_fy = node.yforce_external + (node.yforce_reaction if not np.isnan(node.yforce_reaction) else 0)
 
     for bar in node.bars:
         if bar.is_computed:
-            sum_x += bar.axial_load * geom.CosineBars(bar1, bar)
-            sum_y += bar.axial_load * geom.SineBars(bar1, bar)
+            vec = geom.BarNodeToVector(node, bar)
+            sum_fx += bar.axial_load * geom.CosineVectors([1,0], vec)
+            sum_fy += bar.axial_load * geom.SineVectors([1,0], vec)
 
-    # Solve for unknown bar forces
-    bar2.axial_load = (sum_y - sum_x * cos_theta) / sin_theta
-    bar1.axial_load = -(sum_x + bar2.axial_load * cos_theta)
+    # Solve the 2x2 linear system
+    A = np.array([[cos1, cos2],
+                  [sin1, sin2]])
+    b = np.array([-sum_fx, -sum_fy])
+
+    try:
+        F = np.linalg.solve(A, b)
+    except np.linalg.LinAlgError:
+        sys.exit("Cannot solve forces at node: bars may be collinear or degenerate")
+
+    bar1.axial_load = F[0]
+    bar2.axial_load = F[1]
     bar1.is_computed = True
     bar2.is_computed = True
 
