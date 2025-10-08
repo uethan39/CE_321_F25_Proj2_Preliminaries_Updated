@@ -5,31 +5,6 @@ Created on Wed Jul 14 12:37:32 2021
 
 @author: kendrick shepherd
 """
-
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Updated Method of Joints
-Handles nodes with >2 unknown bars via iterative solving
-Ensures NaN reactions are treated as 0 in force summation
-"""
-
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Updated Method of Joints
-Handles complex trusses by only solving truly solvable nodes
-Prevents explosions from attempting to solve nodes with 2 fully unknown bars
-"""
-
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Updated Method of Joints
-Handles complex trusses by starting at nodes with known reactions
-and propagates iteratively to compute all bar forces safely.
-"""
-
 import sys
 import numpy as np
 import Geometry_Operations as geom
@@ -43,7 +18,7 @@ def UnknownBars(node):
     return unknown_bars
 
 # Determine if a node is solvable
-def NodeIsSolvable(node):
+def NodeIsViable(node):
     unknown_bars = UnknownBars(node)
     if len(unknown_bars) == 0:
         return False
@@ -116,7 +91,7 @@ def IterateUsingMethodOfJoints(nodes, bars):
         progress_made = False
 
         for node in nodes:
-            if NodeIsSolvable(node):
+            if NodeIsViable(node):
                 unknown_bars = UnknownBars(node)
                 if len(unknown_bars) == 1:
                     SumOfForcesInLocalX(node, unknown_bars[0])
