@@ -76,13 +76,13 @@ Q74::T
 Q75::T
 Q76::T
 Q77::T
-Q78::
-Q79::
-Q80::
-Q81::
-Q82::
-Q83::
-Q84::
-Q85::
-Q86::
-Q87::
+Q78::T
+Q79::T
+Q80::5.14
+Q81::5.51
+Q82::11.03
+Q83::N
+Q84::N
+Q85::N
+Q86::The scissor truss shows much higher member forces than the 6 and 8 panel trusses, with a peak axial load around 84.36 kips compared to about 39 and 42 kips for the 6 and 8 panel types. The 6 and 8 panel trusses have similar maximal and minimal loads and distribute forces more evenly across members, while the scissor concentrates loads in fewer members. With the same member area the scissor would require heavier sections or reinforcement in its highly loaded members which raises material and fabrication cost relative to the more uniform 6 and 8 panel layouts. Aesthetically the 6 and 8 panel trusses are simpler and more regular which aids constructability and visual consistency, whereas the scissor is more complex and visually distinctive.
+Q87::Based on the force distribution, material use, and constructability I recommend the 8 panel truss as the best option because it balances load distribution and member sizes, keeps peak stresses low relative to yield, and maintains a regular geometry that is economical to fabricate and visually acceptable; the scissor truss, while distinctive, concentrates forces and would likely increase cost due to larger required sections, and the 6 panel is slightly lighter in force but offers less redundancy than the 8 panel.
